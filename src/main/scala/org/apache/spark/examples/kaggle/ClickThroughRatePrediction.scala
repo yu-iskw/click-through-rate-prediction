@@ -18,6 +18,8 @@ package org.apache.spark.examples.kaggle
 
 import scala.collection.mutable.ArrayBuffer
 
+import scopt.OptionParser
+
 import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
@@ -34,11 +36,35 @@ object ClickThroughRatePrediction {
     "C18", "C19", "C20", "C21"
   )
 
+  case class ClickThroughRatePredictionParams(
+    trainInput: String = null,
+    testInput: String = null
+  )
+
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName(this.getClass.getSimpleName)
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
+
+    val defaultParam = new ClickThroughRatePredictionParams()
+    val parser = new OptionParser[ClickThroughRatePredictionParams]("RandomForestExample") {
+      head(s"${this.getClass.getSimpleName}: Try a Kaggle competition.")
+      opt[String]("trainInput")
+        .text("train input")
+        .action((x, c) => c.copy(trainInput = x))
+        .required()
+      opt[String]("testIinput")
+        .text("test input")
+        .action((x, c) => c.copy(testInput = x))
+        .required()
+    }
+    parser.parse(args, defaultParam).map { params =>
+      run(sc, sqlContext, params.trainInput, params.testInput)
+    } getOrElse {
+      sys.exit(1)
+    }
   }
+
 
   def run(sc: SparkContext, sqlContext: SQLContext, trainPath: String, testPath: String): Unit = {
     import sqlContext.implicits._

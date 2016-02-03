@@ -32,7 +32,8 @@ licenses := Seq("Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
 sparkComponents ++= Seq("sql", "mllib")
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "2.1.5" % "test"
+  "org.scalatest" %% "scalatest" % "2.1.5" % "test",
+  "com.github.scopt" % "scopt_2.10" % "3.3.0"
 )
 
 
