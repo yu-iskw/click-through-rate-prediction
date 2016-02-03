@@ -19,8 +19,10 @@
 
 THIS_PROJECT_HOME="$( cd $(dirname $( dirname $0)) && pwd )"
 
-PACKAGED_JAR=$(find ${THIS_PROJECT_HOME}/target -name "*.jar")
+PACKAGED_JAR=$(find ${THIS_PROJECT_HOME}/target -name "click-through-rate-prediction-assembly*.jar")
 
 ${SPARK_HOME}/bin/spark-submit \
   --class "org.apache.spark.examples.kaggle.ClickThroughRatePrediction" \
-  "$PACKAGED_JAR"
+  "$PACKAGED_JAR" \
+  --train "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/train" \
+  --test "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/test"
