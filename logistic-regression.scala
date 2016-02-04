@@ -71,7 +71,8 @@ model1.transform(test).select($"id", $"features").
 
 // Reloads data
 val trainDF = sqlContext.read.parquet(convertedTrainPath).
-  repartition(640).sample(false, 0.1).cache()
+  repartition(640).cache()
+  repartition(640).sample(false, 0.5).cache()
 val testDF = sqlContext.read.parquet(convertedTestPath).cache()
 
 // Trains a model
@@ -80,10 +81,10 @@ val pipeline = new Pipeline().setStages(Array(lr))
 val paramGrid = new ParamGridBuilder().
   addGrid(lr.labelCol, Array("label")).
   addGrid(lr.featuresCol, Array("features")).
-  // addGrid(lr.threshold, Array(0.25, 0.5, 0.75)).
-  // addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0)).
+  addGrid(lr.threshold, Array(0.25, 0.5, 0.75)).
+  addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0)).
   // addGrid(lr.fitIntercept, Array(false, true)).
-  // addGrid(lr.maxIter, Array(50, 100, 150)).
+  addGrid(lr.maxIter, Array(50, 100)).
   build()
 val cv = new CrossValidator().
   setEstimator(pipeline).
@@ -101,3 +102,21 @@ cvModel.bestModel.parent match {
 
 // Predicts with the trained model
 val result0 = cvModel.transform(trainDF)
+
+// Stage[1]: LogisticRegression
+// {
+//   logreg_006eb1862908-elasticNetParam: 0.5,
+//   logreg_006eb1862908-featuresCol: features,
+//   logreg_006eb1862908-fitIntercept: true,
+//   logreg_006eb1862908-labelCol: label,
+//   logreg_006eb1862908-maxIter: 100,
+//   logreg_006eb1862908-predictionCol: prediction,
+//   logreg_006eb1862908-probabilityCol: probability,
+//   logreg_006eb1862908-rawPredictionCol: rawPrediction,
+//   logreg_006eb1862908-regParam: 0.0,
+//   logreg_006eb1862908-standardization: true,
+//   logreg_006eb1862908-threshold: 0.25,
+//   logreg_006eb1862908-tol: 1.0E-6,
+//   logreg_006eb1862908-weightCol:
+// 
+// }
