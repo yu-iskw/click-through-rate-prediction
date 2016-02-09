@@ -221,13 +221,14 @@ object ClickThroughRatePrediction {
     // Predicts with the trained best model
     val resultDF = cvModel.transform(testDF).select('id, 'probability).map {
       case Row(id: String, probability: Vector) => (id, probability(1))
-    }.toDF("id", "click").repartition(1)
+    }.toDF("id", "click")
 
     // Save the result
-    resultDF.write.mode(SaveMode.Overwrite)
+    resultDF.repartition(1).write.mode(SaveMode.Overwrite)
       .format("com.databricks.spark.csv")
       .option("header", "true").option("inferSchema", "true")
       .save(resultPath)
   }
 }
+
 // scalastyle:on println

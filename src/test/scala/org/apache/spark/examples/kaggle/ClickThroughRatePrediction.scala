@@ -20,8 +20,7 @@ package org.apache.spark.examples.kaggle
 import org.apache.spark.SparkFunSuite
 import org.apache.spark.util.MLlibTestSparkContext
 
-class ClickThroughRatePredictionSuite extends SparkFunSuite
-  with MLlibTestSparkContext {
+class ClickThroughRatePredictionSuite extends SparkFunSuite with MLlibTestSparkContext {
 
   test("run") {
     //    Logger.getLogger("org").setLevel(Level.OFF)
