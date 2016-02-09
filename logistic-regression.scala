@@ -138,13 +138,9 @@ val data = sqlContext.read.format("com.databricks.spark.csv").
   option("header", "true").
   option("inferSchema", "true").
   load(path).cache()
-
-val tokenizer = new Tokenizer()
-  .setInputCol("Text")
-  .setOutputCol("words")
-val hashingTF = new HashingTF()
-  .setNumFeatures(1000)
-  .setInputCol(tokenizer.getOutputCol)
-  .setOutputCol("features")
+import org.apache.spark.ml.feature._
+val tokenizer = new Tokenizer().setInputCol("Text").setOutputCol("words")
+val hashingTF = new HashingTF().setNumFeatures(1000).setInputCol(tokenizer.getOutputCol).setOutputCol("features")
 val p = new Pipeline().setStages(Array(tokenizer, hashingTF))
 val model = p.fit(data)
+val data2 = model.transform(data)
