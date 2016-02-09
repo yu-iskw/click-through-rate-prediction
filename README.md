@@ -13,8 +13,15 @@ https://www.kaggle.com/c/avazu-ctr-prediction
 ## Approach
 
 1. Extracts features of categorical features with `OneHotEncoder` with `StringIndexer`
-2. Train a model with `LogisticRegressionClassifier` with `CrossValidator`
+2. Train a model with `LogisticRegression` with `CrossValidator`
 
 In the extracting features phase, we merged the training data with the test data.
 Since, the test data includes values which doesn't exists in the training data.
 Therefore, we needed to avoid errors about missing values of each variables, when extracting features of the test data.
+
+## Result
+
+I run this application with the following parameter grid.
+
+
+As a result of this param grid, I got as the metric at the Kaggle's contest.

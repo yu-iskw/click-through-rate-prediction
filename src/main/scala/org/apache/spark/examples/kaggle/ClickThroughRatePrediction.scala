@@ -91,7 +91,8 @@ object ClickThroughRatePrediction {
   case class ClickThroughRatePredictionParams(
     trainInput: String = null,
     testInput: String = null,
-    resultOutput: String = null
+    resultOutput: String = null,
+    bestModelOutput: String = null
   )
 
   /**
@@ -103,7 +104,8 @@ object ClickThroughRatePrediction {
    *   /path/to/click-through-rate-prediction-assembly-1.0.jar \
    *   --train=/path/to/train \
    *   --test=/path/to/test \
-   *   --result=/path/to/result.csv
+   *   --result=/path/to/result.csv \
+   *   --best=/path/to/best-model
    * }}
    * SEE ALSO: https://www.kaggle.com/c/avazu-ctr-prediction
    */
@@ -124,12 +126,17 @@ object ClickThroughRatePrediction {
         .action((x, c) => c.copy(testInput = x))
         .required()
       opt[String]("result")
-        .text("test input")
+        .text("result output path")
         .action((x, c) => c.copy(resultOutput = x))
+        .required()
+      opt[String]("best")
+        .text("best model output path")
+        .action((x, c) => c.copy(bestModelOutput = x))
         .required()
     }
     parser.parse(args, defaultParam).map { params =>
-      run(sc, sqlContext, params.trainInput, params.testInput, params.resultOutput)
+      run(sc, sqlContext,
+        params.trainInput, params.testInput, params.resultOutput, params.bestModelOutput)
     } getOrElse {
       sys.exit(1)
     }
@@ -138,7 +145,7 @@ object ClickThroughRatePrediction {
 
   private[examples]
   def run(sc: SparkContext, sqlContext: SQLContext,
-    trainPath: String, testPath: String, resultPath: String): Unit = {
+      trainPath: String, testPath: String, resultPath: String, bestModelPath: String): Unit = {
     import sqlContext.implicits._
 
     // Sets the target variables
@@ -202,8 +209,8 @@ object ClickThroughRatePrediction {
     val paramGrid = new ParamGridBuilder()
       .addGrid(lr.threshold, Array(0.25, 0.5, 0.75))
       .addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0))
-      .addGrid(lr.regParam, Array(0.001, 0.01, 0.2, 0.5))
-      .addGrid(lr.maxIter, Array(50, 100, 150))
+      .addGrid(lr.regParam, Array(0.0, 0.01, 0.1))
+      .addGrid(lr.maxIter, Array(1))
       .build()
     val cv = new CrossValidator()
       .setEstimator(pipeline)
@@ -211,6 +218,9 @@ object ClickThroughRatePrediction {
       .setEstimatorParamMaps(paramGrid)
       .setNumFolds(3)
     val cvModel = cv.fit(trainDF)
+
+    // Saves the best model
+    cvModel.write.overwrite().save(bestModelPath)
 
     // Shows the best parameters
     cvModel.bestModel.parent match {
