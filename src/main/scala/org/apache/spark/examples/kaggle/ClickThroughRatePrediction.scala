@@ -98,12 +98,12 @@ object ClickThroughRatePrediction {
    * Try Kaggle's Click-Through Rate Prediction with Logistic Regression Classification
    * Run with
    * {{
-   *   $SPARK_HOME/bin/spark-submit \
-   *     --class org.apache.spark.examples.kaggle.ClickThroughRatePredictionWitLogisticRegression \
-   *     /path/to/jar \
-   *     --train=/path/to/train \
-   *     --test=/path/to/test \
-   *     --result=/path/to/result.csv
+   * $SPARK_HOME/bin/spark-submit \
+   *   --class org.apache.spark.examples.kaggle.ClickThroughRatePredictionWitLogisticRegression \
+   *   /path/to/click-through-rate-prediction-assembly-1.0.jar \
+   *   --train=/path/to/train \
+   *   --test=/path/to/test \
+   *   --result=/path/to/result.csv
    * }}
    * SEE ALSO: https://www.kaggle.com/c/avazu-ctr-prediction
    */
