@@ -21,13 +21,15 @@ import scala.collection.mutable.ArrayBuffer
 
 import scopt.OptionParser
 
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.ml.{Pipeline, PipelineStage}
 import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 import org.apache.spark.ml.feature.{OneHotEncoder, StringIndexer, VectorAssembler}
 import org.apache.spark.ml.tuning.{CrossValidator, ParamGridBuilder}
-import org.apache.spark.ml.{Pipeline, PipelineStage}
-import org.apache.spark.sql.{SQLContext, SaveMode}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.sql.{Row, SQLContext, SaveMode}
+import org.apache.spark.sql.types._
 
 object ClickThroughRatePredictionWithLogisticRegression {
 
@@ -40,12 +42,78 @@ object ClickThroughRatePredictionWithLogisticRegression {
     "C18", "C19", "C20", "C21"
   )
 
+  val trainSchema = StructType(Array(
+    StructField("id", LongType , true),
+    StructField("click", IntegerType , true),
+    StructField("hour", IntegerType , true),
+    StructField("C1", IntegerType , true),
+    StructField("banner_pos", IntegerType , true),
+    StructField("site_id", StringType , true),
+    StructField("site_domain", StringType , true),
+    StructField("site_category", StringType , true),
+    StructField("app_id", StringType , true),
+    StructField("app_domain", StringType , true),
+    StructField("app_category", StringType , true),
+    StructField("device_id", StringType , true),
+    StructField("device_ip", StringType , true),
+    StructField("device_model", StringType , true),
+    StructField("device_type", IntegerType , true),
+    StructField("device_conn_type", IntegerType , true),
+    StructField("C14", IntegerType , true),
+    StructField("C15", IntegerType , true),
+    StructField("C16", IntegerType , true),
+    StructField("C17", IntegerType , true),
+    StructField("C18", IntegerType , true),
+    StructField("C19", IntegerType , true),
+    StructField("C20", IntegerType , true),
+    StructField("C21", IntegerType , true)
+  ))
+
+  val testSchema = StructType(Array(
+    StructField("id", LongType , true),
+    StructField("hour", IntegerType , true),
+    StructField("C1", IntegerType , true),
+    StructField("banner_pos", IntegerType , true),
+    StructField("site_id", StringType , true),
+    StructField("site_domain", StringType , true),
+    StructField("site_category", StringType , true),
+    StructField("app_id", StringType , true),
+    StructField("app_domain", StringType , true),
+    StructField("app_category", StringType , true),
+    StructField("device_id", StringType , true),
+    StructField("device_ip", StringType , true),
+    StructField("device_model", StringType , true),
+    StructField("device_type", IntegerType , true),
+    StructField("device_conn_type", IntegerType , true),
+    StructField("C14", IntegerType , true),
+    StructField("C15", IntegerType , true),
+    StructField("C16", IntegerType , true),
+    StructField("C17", IntegerType , true),
+    StructField("C18", IntegerType , true),
+    StructField("C19", IntegerType , true),
+    StructField("C20", IntegerType , true),
+    StructField("C21", IntegerType , true)
+  ))
+
   case class ClickThroughRatePredictionParams(
     trainInput: String = null,
     testInput: String = null,
     resultOutput: String = null
   )
 
+  /**
+   * Try Kaggle's Click-Through Rate Prediction
+   * Run with
+   * {{
+   * $SPARK_HOME/bin/spark-submit \
+   *   --class org.apache.spark.examples.kaggle.ClickThroughRatePredictionWitLogisticRegression \
+   *   --jars /path/to/ \
+   *   --train=/path/to/train \
+   *   --test=/path/to/test \
+   *   --result=/path/to/result.csv
+   * }}
+   * SEE ALSO: https://www.kaggle.com/c/avazu-ctr-prediction
+   */
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName(this.getClass.getSimpleName)
     val sc = new SparkContext(conf)
@@ -77,7 +145,7 @@ object ClickThroughRatePredictionWithLogisticRegression {
 
 
   def run(sc: SparkContext, sqlContext: SQLContext,
-    trainPath: String, testPath: String, savedPath: String): Unit = {
+    trainPath: String, testPath: String, resultPath: String): Unit = {
     import sqlContext.implicits._
 
     // Loads training data and testing data
@@ -88,10 +156,9 @@ object ClickThroughRatePredictionWithLogisticRegression {
       option("header", "true").option("inferSchema", "true").
       load(testPath).cache()
 
+    // Formats data
     def getIndexedColumn(clm: String): String = s"${clm}_indexed"
     def getColumnVec(clm: String): String = s"${clm}_vec"
-
-    // Formats data
     val stages1 = ArrayBuffer.empty[PipelineStage]
     val strIdxrClick = new StringIndexer().
       setInputCol("click").
@@ -124,8 +191,6 @@ object ClickThroughRatePredictionWithLogisticRegression {
     val paramGrid = new ParamGridBuilder().
       addGrid(lr.threshold, Array(0.25, 0.5, 0.75)).
       addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0)).
-      addGrid(lr.fitIntercept, Array(false, true)).
-      addGrid(lr.maxIter, Array(50, 100, 150)).
       build()
     val cv = new CrossValidator().
       setEstimator(pipeline).
@@ -141,10 +206,23 @@ object ClickThroughRatePredictionWithLogisticRegression {
         }
     }
 
+    // Re-trains with the best parameters
+    val lr2 = new LogisticRegression()
+    cvModel.bestModel.extractParamMap().toSeq.foreach { param =>
+      lr2.set(param.param, param.value)
+    }
+    val bestModel = lr2.fit(trainDF)
 
     // Predicts with the trained model
-    val result0 = cvModel.transform(trainDF)
-    val result = cvModel.transform(testDF)
-    result.write.mode(SaveMode.Overwrite).parquet(savedPath)
+    val result = cvModel.transform(testDF).select('id, 'probability).
+      map { case Row(id: Long, probability: Vector) => (id, probability(1))
+    }.toDF("id", "click").repartition(1)
+
+    // Save the result
+    result.write.mode(SaveMode.Overwrite).
+      format("com.databricks.spark.csv").
+      option("header", "true").option("inferSchema", "true").
+      save(resultPath)
+
   }
 }
