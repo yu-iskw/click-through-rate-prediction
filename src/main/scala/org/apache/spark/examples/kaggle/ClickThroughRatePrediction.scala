@@ -189,6 +189,9 @@ object ClickThroughRatePrediction {
     val feModel = fePipeline.fit(union)
     val trainDF = feModel.transform(train).select('click, 'features).cache()
     val testDF = feModel.transform(test).select('id, 'features).cache()
+    union.unpersist()
+    train.unpersist()
+    test.unpersist()
 
     // Trains a model with CrossValidator
     val si4click = new StringIndexer()
