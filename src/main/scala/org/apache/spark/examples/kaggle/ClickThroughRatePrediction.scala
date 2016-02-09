@@ -32,6 +32,7 @@ import org.apache.spark.sql.{Row, SQLContext, SaveMode}
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types._
 
+// scalastyle:off println
 object ClickThroughRatePrediction {
 
   private val trainSchema = StructType(Array(
@@ -229,3 +230,4 @@ object ClickThroughRatePrediction {
       .save(resultPath)
   }
 }
+// scalastyle:on println
