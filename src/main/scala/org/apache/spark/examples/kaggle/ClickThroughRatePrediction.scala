@@ -150,11 +150,11 @@ object ClickThroughRatePrediction {
 
     // Loads training data and testing data from CSV files
     val train = sqlContext.read.format("com.databricks.spark.csv")
-      .option("header", "true").option("inferSchema", "true")
+      .option("header", "true")
       .schema(trainSchema)
       .load(trainPath).cache()
     val test = sqlContext.read.format("com.databricks.spark.csv")
-      .option("header", "true").option("inferSchema", "true")
+      .option("header", "true")
       .schema(testSchema)
       .load(testPath).cache()
 
