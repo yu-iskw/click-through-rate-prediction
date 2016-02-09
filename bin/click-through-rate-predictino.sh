@@ -25,5 +25,5 @@ ${SPARK_HOME}/bin/spark-submit \
   --class "org.apache.spark.examples.kaggle.ClickThroughRatePrediction" \
   "$PACKAGED_JAR" \
   --train "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/train" \
-  --test "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/test"
+  --test "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/test" \
   --result "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/result"
