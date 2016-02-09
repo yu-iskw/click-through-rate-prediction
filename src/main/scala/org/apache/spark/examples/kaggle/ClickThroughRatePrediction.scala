@@ -198,6 +198,7 @@ object ClickThroughRatePrediction {
     val paramGrid = new ParamGridBuilder()
       .addGrid(lr.threshold, Array(0.25, 0.5, 0.75))
       .addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0))
+      .addGrid(lr.regParam, Array(0.001, 0.01, 0.2, 0.5))
       .addGrid(lr.maxIter, Array(50, 100, 150))
       .build()
     val cv = new CrossValidator()
