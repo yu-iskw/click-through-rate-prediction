@@ -3,6 +3,28 @@
 The purpose of this Spark Application is to test Spark Pipeline API with real data for [SPARK-13239](https://issues.apache.org/jira/browse/SPARK-13239).
 So, we tested ML Pipeline API with Kaggle's click-through rate prediction.
 
+
+## Build & Run
+You can build this Spark application with `sbt clean assembly`.
+And you can run it the command.
+
+```
+$SPARK_HOME/bin/spark-submit \
+  -class org.apache.spark.examples.kaggle.ClickThroughRatePredictionWitLogisticRegression \
+  /path/to/click-through-rate-prediction-assembly-1.0.jar \
+  --train=/path/to/train \
+  --test=/path/to/test \
+  --result=/path/to/result.csv
+```
+
+- `--train`: the training data you downloaded
+- `--test`: the test data you downloaded
+- `--result`: result file
+
+You know, Spark ML can't write a single file directly.
+However, making the number of partitions of result DataFrame 1, this application aggregates the result as a file.
+So you can get the result CSV file from `part-00000` under the path which you set at `--result` option.
+
 ## The Kaggle Contest
 
 > Predict whether a mobile ad will be clicked

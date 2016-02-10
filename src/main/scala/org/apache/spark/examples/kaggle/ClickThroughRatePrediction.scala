@@ -103,8 +103,7 @@ object ClickThroughRatePrediction {
    *   /path/to/click-through-rate-prediction-assembly-1.0.jar \
    *   --train=/path/to/train \
    *   --test=/path/to/test \
-   *   --result=/path/to/result.csv \
-   *   --best=/path/to/best-model
+   *   --result=/path/to/result.csv
    * }}
    * SEE ALSO: https://www.kaggle.com/c/avazu-ctr-prediction
    */
