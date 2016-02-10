@@ -26,5 +26,4 @@ ${SPARK_HOME}/bin/spark-submit \
   "$PACKAGED_JAR" \
   --train "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/train" \
   --test "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/test" \
-  --result "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/result/" \
-  --best "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/best-model/"
+  --result "s3n://s3-yu-ishikawa/test-data/click-through-rate-prediction/result/"
