@@ -100,7 +100,7 @@ object ClickThroughRatePrediction {
    * {{
    * $SPARK_HOME/bin/spark-submit \
    *   --class org.apache.spark.examples.kaggle.ClickThroughRatePredictionWitLogisticRegression \
-   *   /path/to/click-through-rate-prediction-assembly-1.0.jar \
+   *   /path/to/click-through-rate-prediction-assembly-1.1.jar \
    *   --train=/path/to/train \
    *   --test=/path/to/test \
    *   --result=/path/to/result.csv
@@ -136,7 +136,6 @@ object ClickThroughRatePrediction {
     sc.stop()
   }
 
-  private[examples]
   def run(sc: SparkContext, sqlContext: SQLContext,
       trainPath: String, testPath: String, resultPath: String): Unit = {
     import sqlContext.implicits._

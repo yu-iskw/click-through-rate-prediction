@@ -10,7 +10,7 @@ crossScalaVersions := Seq("2.10.5", "2.11.7")
 spName := "yu-iskw/click-through-rate-prediction"
 
 // Don't forget to set the version
-version := "1.0"
+version := "1.1"
 
 spAppendScalaVersion := true
 
