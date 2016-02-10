@@ -1,6 +1,7 @@
 # Try Kaggle's Click Through Rate Prediction with Spark Pipeline API
 
-The purpose of this Spark Application is to test Spark Pipeline API with real data.
+The purpose of this Spark Application is to test Spark Pipeline API with real data for [SPARK-13239](https://issues.apache.org/jira/browse/SPARK-13239).
+So, we tested ML Pipeline API with Kaggle's click-through rate prediction.
 
 ## The Kaggle Contest
 
@@ -40,4 +41,5 @@ I got the score: `0.3998684` with the following parameter set.
 
 ## TODO
 
-Since `spark.ml` doesn't offer Loggistic-Loss at Spark 1.6, we should change the evaluator for Cross-Validation to logg-loss.
+We should offer more `Evaluator`s, such as logg-loss.
+Since `spark.ml` doesn't offer Loggistic-Loss at Spark 1.6, we might get better score with logg-loss evaluator.
