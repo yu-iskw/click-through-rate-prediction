@@ -29,9 +29,7 @@ class ClickThroughRatePredictionSuite extends SparkFunSuite with MLlibTestSparkC
     val trainPath = this.getClass.getResource("/train.part-10000").getPath
     val testPath = this.getClass.getResource("/test.part-10000").getPath
     val resultPath = "./tmp/result/"
-    val bestModelPath = "./tmp/best-model/"
 
-    ClickThroughRatePrediction
-      .run(sc, sqlContext, trainPath, testPath, resultPath, bestModelPath)
+    ClickThroughRatePrediction.run(sc, sqlContext, trainPath, testPath, resultPath)
   }
 }

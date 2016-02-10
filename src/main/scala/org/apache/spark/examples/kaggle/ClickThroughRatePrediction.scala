@@ -91,8 +91,7 @@ object ClickThroughRatePrediction {
   case class ClickThroughRatePredictionParams(
     trainInput: String = null,
     testInput: String = null,
-    resultOutput: String = null,
-    bestModelOutput: String = null
+    resultOutput: String = null
   )
 
   /**
@@ -129,14 +128,9 @@ object ClickThroughRatePrediction {
         .text("result output path")
         .action((x, c) => c.copy(resultOutput = x))
         .required()
-      opt[String]("best")
-        .text("best model output path")
-        .action((x, c) => c.copy(bestModelOutput = x))
-        .required()
     }
     parser.parse(args, defaultParam).map { params =>
-      run(sc, sqlContext,
-        params.trainInput, params.testInput, params.resultOutput, params.bestModelOutput)
+      run(sc, sqlContext, params.trainInput, params.testInput, params.resultOutput)
     } getOrElse {
       sys.exit(1)
     }
@@ -145,7 +139,7 @@ object ClickThroughRatePrediction {
 
   private[examples]
   def run(sc: SparkContext, sqlContext: SQLContext,
-      trainPath: String, testPath: String, resultPath: String, bestModelPath: String): Unit = {
+      trainPath: String, testPath: String, resultPath: String): Unit = {
     import sqlContext.implicits._
 
     // Sets the target variables
@@ -207,10 +201,10 @@ object ClickThroughRatePrediction {
     val lr = new LogisticRegression()
     val pipeline = new Pipeline().setStages(Array(si4click, lr))
     val paramGrid = new ParamGridBuilder()
-      .addGrid(lr.threshold, Array(0.25, 0.5, 0.75))
-      .addGrid(lr.elasticNetParam, Array(0.0, 0.5, 1.0))
-      .addGrid(lr.regParam, Array(0.0, 0.01, 0.1))
-      .addGrid(lr.maxIter, Array(1))
+      .addGrid(lr.threshold, Array(0.21, 0.22, 0.23))
+      .addGrid(lr.elasticNetParam, Array(0.0))
+      .addGrid(lr.regParam, Array(0.01))
+      .addGrid(lr.maxIter, Array(100))
       .build()
     val cv = new CrossValidator()
       .setEstimator(pipeline)
@@ -218,9 +212,6 @@ object ClickThroughRatePrediction {
       .setEstimatorParamMaps(paramGrid)
       .setNumFolds(3)
     val cvModel = cv.fit(trainDF)
-
-    // Saves the best model
-    cvModel.write.overwrite().save(bestModelPath)
 
     // Shows the best parameters
     cvModel.bestModel.parent match {
