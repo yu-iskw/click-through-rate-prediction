@@ -14,6 +14,7 @@ https://www.kaggle.com/c/avazu-ctr-prediction
 
 1. Extracts features of categorical features with `OneHotEncoder` with `StringIndexer`
 2. Train a model with `LogisticRegression` with `CrossValidator`
+    - The `Evaluator` of `CrossValidator` is the default of `BinaryClassificationEvaluator`.
 
 We merged the training data with the test data in the extracting features phase.
 Since, the test data includes values which doesn't exists in the training data.
@@ -24,7 +25,19 @@ Therefore, we needed to avoid errors about missing values of each variables, whe
 I got the score: `0.3998684` with the following parameter set.
 
 - Logistic Regression
-    - `threshold`: 0.22
-    - `elasticNetParam`: 0.0
-    - `regParam`: 0.01
+    - `featuresCol`: features
+    - `fitIntercept`: true
+    - `labelCol`: label
     - `maxIter`: 100
+    - `predictionCol`: prediction
+    - `probabilityCol`: probability
+    - `rawPredictionCol`: rawPrediction
+    - `regParam`: 0.001
+    - `standardization`: true
+    - `threshold`: 0.22
+    - `tol`: 1.0E-6
+    - `weightCol`:
+
+## TODO
+
+Since `spark.ml` doesn't offer Loggistic-Loss at Spark 1.6, we should change the evaluator for Cross-Validation to logg-loss.
